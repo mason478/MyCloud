@@ -18,6 +18,7 @@ class LocalmachineConfig(Config):
     DEBUG = True
     REDIS_HOST = 'localhost'
     REDIS_PORT = 6379
+    REDIS_PASSWORD=os.getenv('REDIS_PASSWORD',"62f4ada291da")
     REDIS_DB = 0
 
 
