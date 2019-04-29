@@ -10,6 +10,7 @@ from app.commons.setting import UPLOAD_FILE_PATH
 from app.commons.input_checker.filename_checking import is_allowed_file
 from app.commons.auth.moudles import TokenBase
 from app.commons.auth import auth_required
+from app.commons.common_init import logger
 
 ns = Namespace('files')
 
@@ -24,7 +25,7 @@ upload_parser.add_argument('file', type=FileStorage, location='files', required=
 class UploadFiles(Resource):
     @ns.doc(parser=upload_parser)
     @auth_required
-    def post(self,user_id):
+    def post(self, user_id):
         args = upload_parser.parse_args()
         file = args['file']
         # TODO:目前只支持英文文件名
@@ -45,7 +46,7 @@ class UploadFiles(Resource):
 class Download(Resource):
     @ns.doc(parser=base_parse)
     @auth_required
-    def get(self, user_id,filename):
+    def get(self, user_id, filename):
         # TODO:对文件名进行解密
         return send_from_directory(UPLOAD_FILE_PATH, filename)
 
@@ -55,7 +56,7 @@ class Download(Resource):
 class AllTheFiles(Resource):
     @ns.doc(parser=base_parse)
     @auth_required
-    def get(self,user_id):
+    def get(self, user_id):
         # TODO:通过数据库查询用户对应的文件空间
 
         # TODO:这样同时返回文件夹和文件，暂时不处理

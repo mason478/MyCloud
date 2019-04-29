@@ -3,3 +3,5 @@ venv
 *.out
 .idea
 test.py
+*.log
+*.png
