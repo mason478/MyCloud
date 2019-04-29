@@ -6,7 +6,8 @@ from jose import jwt
 from jose.exceptions import ExpiredSignatureError, JWTError, JWSSignatureError
 
 from app.commons.setting import JWT_SECRET, JWT_EXPIRETIME
-
+from app.commons.my_exception import GetTokenError
+from app.commons.change_format import RET
 
 def create_token(user_data, expire_time=JWT_EXPIRETIME):
     """
@@ -41,11 +42,11 @@ def decode_jwt(token):
         payload = jwt.decode(token, secret.decode(), algorithms='HS256')
         return payload
     except JWSSignatureError as e:
-        raise e
+        raise GetTokenError(RET.TOKEN_INVALID)
     except ExpiredSignatureError as e:
-        raise e
+        raise GetTokenError(RET.TOKEN_EXPIRED)
     except JWTError as e:
-        raise e
+        raise GetTokenError(RET.TOKEN_INVALID)
 
 
 def encode_jwt(data):

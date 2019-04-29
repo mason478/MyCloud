@@ -3,6 +3,9 @@ from flask import request, abort, Response
 
 from app.commons.change_format import RET, add_response
 from app.commons.token_handler import decode_jwt
+from app.commons.my_exception import GetTokenError
+from app.commons.auth.moudles import TokenBase
+from app.commons.my_exception import RedisServiceError
 
 
 def extra_token(headers):
@@ -21,28 +24,44 @@ def extra_token(headers):
 
 # 装饰器，用来验证token
 def auth_required(func):
-    def wrapper(*args):
+    def wrapper(*args,**kwargs):
         auth_header = request.headers.get('Authorization')
         if auth_header is None:
             return add_response({}, RET.TOKEN_NULL), 401
         auth_token = extra_token(auth_header)
         if auth_token is None:
             return add_response({}, RET.TOKEN_INVALID), 401
+
+        payload_dict=None
         try:
-            payload_list = decode_jwt(auth_token)  # 解码后的token 是 dict
-            payload_keys = list(payload_list.keys())
+            payload_dict = decode_jwt(auth_token)  # 解码后的token 是 dict
+            payload_keys = list(payload_dict.keys())
             fields = ['user_id', 'user_name', 'exp', 'iat']  # payload 应该含有的字段
             cmp = all(True if k in payload_keys else False for k in fields)  # 字段的对照
             if not cmp:
                 return add_response({}, RET.TOKEN_INVALID), 401
             valid = True
 
-        except Exception as e:
+        except GetTokenError as e:
             # TODO:打log
+            valid = False
+            ret=add_response({}, e.error_code)
+        except Exception as e:
+            #log
             valid=False
-            return add_response({}, RET.TOKEN_PARSER_ERROR)
+            ret= add_response({},RET.TOKEN_PARSER_ERROR)
+
         if valid:
-            #验证token 在redis的储存情况
-            pass
+            try:
+               # 验证token 在redis的储存情况
+               user_id=str(payload_dict.get('user_id'))
+               valid=TokenBase(user_id).validate_token(auth_token)
+               if valid:
+                   ret=func(*args,user_id,**kwargs)
+            except RedisServiceError as e:
+                ret=add_response({},e.error_code)
+            except Exception as e:
+                ret=add_response({},RET.TOKEN_PARSER_ERROR)
+        return ret
 
     return wrapper

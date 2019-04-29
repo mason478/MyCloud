@@ -3,8 +3,15 @@ from app.commons.common_init import connect
 
 
 class TokenBase(CacheDict):
-    def __init__(self, key, token=None, refresh_token=None, expire_time=None):
-        super(TokenBase, self).__init__(connect, key)
+    def __init__(self, id, token=None, refresh_token=None, expire_time=None):
+        """
+        token在redis里的格式为{"Token:{id}":{"token":{token}}}
+        :param id: str:user id
+        :param token:
+        :param refresh_token:
+        :param expire_time:
+        """
+        super(TokenBase, self).__init__(connect, "Token:"+id) #所以在这里需要加上"Token"
 
         # 设置token
         if token:

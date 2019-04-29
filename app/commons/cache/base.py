@@ -1,6 +1,8 @@
 import redis
 from redis import TimeoutError
 
+from app.commons.my_exception import RedisServiceError
+from app.commons.change_format import RET
 
 class CacheObject:
 
@@ -16,7 +18,8 @@ class CacheObject:
         try:
             self.redis.ping()
         except TimeoutError as e:
-            raise e
+            raise RedisServiceError(error_code=RET.REDIS_CONNECT_ERROR)
+
         self.key=key
 
     def expire(self, time):
