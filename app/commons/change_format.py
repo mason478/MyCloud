@@ -16,6 +16,9 @@ class RET:
     #数据库链接错误
     REDIS_CONNECT_ERROR=5001
 
+    SQL_OPERATION_ERROR = 5010
+    SQL_CONDITION_ERROR=5011
+
 
 error_dict = {
     RET.FILE_ERROR: '非法的文件名或扩展名',
@@ -25,6 +28,8 @@ error_dict = {
     RET.REDIS_CONNECT_ERROR:"redis连接错误",
     RET.TOKEN_EXPIRED:"Token过期",
     RET.UNKNOWN_ERROR:"内部未知错误",
+    RET.SQL_OPERATION_ERROR:"数据库操作错误",
+    RET.SQL_CONDITION_ERROR:"数据库输入条件错误"
 }
 
 

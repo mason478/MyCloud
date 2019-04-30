@@ -11,3 +11,11 @@ class GetTokenError(BaseException):
 class RedisServiceError(BaseException):
     """redis 连接错误"""
     pass
+
+class SqlOperationError(BaseException):
+    """mysql 查询错误"""
+    pass
+
+class SqlConditionError(BaseException):
+    '''mysql条件输入错误'''
+    pass

@@ -10,7 +10,7 @@ from app.commons.setting import UPLOAD_FILE_PATH
 from app.commons.input_checker.filename_checking import is_allowed_file
 from app.commons.auth.moudles import TokenBase
 from app.commons.auth import auth_required
-from app.commons.common_init import logger
+from app.commons.log_handler import logger
 
 ns = Namespace('files')
 
@@ -37,6 +37,7 @@ class UploadFiles(Resource):
 
         file.save(os.path.join(UPLOAD_FILE_PATH, filename))
         # TODO:给文件名进行对称加密
+        logger.logger.info("this is a test for logger{}".format(user_id))
         encrypt_filename = filename
         return add_response(r_code=RET.OK, j_dict={"url": url_for('api1.files_download', filename=file.filename)})
 

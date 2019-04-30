@@ -1,3 +1,6 @@
 Flask==1.0.2
 flask-restplus==0.12.1
-python-jose
+python-jose==3.0.1
+pymysql == 0.9.3
+pycrypto ==2.6.1
+DBUtils==1.3

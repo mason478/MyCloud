@@ -1,12 +1,12 @@
 import traceback
-from flask import request, abort, Response
+from flask import request
 
 from app.commons.change_format import RET, add_response
 from app.commons.token_handler import decode_jwt
 from app.commons.my_exception import GetTokenError
 from app.commons.auth.moudles import TokenBase
 from app.commons.my_exception import RedisServiceError
-
+from app.commons.log_handler import logger
 
 def extra_token(headers):
     """
@@ -24,7 +24,7 @@ def extra_token(headers):
 
 # 装饰器，用来验证token
 def auth_required(func):
-    def wrapper(*args,**kwargs):
+    def wrapper(*args, **kwargs):
         auth_header = request.headers.get('Authorization')
         if auth_header is None:
             return add_response({}, RET.TOKEN_NULL), 401
@@ -32,7 +32,7 @@ def auth_required(func):
         if auth_token is None:
             return add_response({}, RET.TOKEN_INVALID), 401
 
-        payload_dict=None
+        payload_dict = None
         try:
             payload_dict = decode_jwt(auth_token)  # 解码后的token 是 dict
             payload_keys = list(payload_dict.keys())
@@ -43,25 +43,27 @@ def auth_required(func):
             valid = True
 
         except GetTokenError as e:
-            # TODO:打log
+            logger.logger.error(msg="Get token error:{},trace back:{}".format(e, traceback.format_exc()))
             valid = False
-            ret=add_response({}, e.error_code)
+            ret = add_response({}, e.error_code)
         except Exception as e:
-            #log
-            valid=False
-            ret= add_response({},RET.TOKEN_PARSER_ERROR)
+            # log
+            valid = False
+            ret = add_response({}, RET.TOKEN_PARSER_ERROR)
 
         if valid:
             try:
-               # 验证token 在redis的储存情况
-               user_id=str(payload_dict.get('user_id'))
-               valid=TokenBase(user_id).validate_token(auth_token)
-               if valid:
-                   ret=func(*args,user_id,**kwargs)
+                # 验证token 在redis的储存情况
+                user_id = str(payload_dict.get('user_id'))
+                valid = TokenBase(user_id).validate_token(auth_token)
+                if valid:
+                    ret = func(*args, user_id, **kwargs)
             except RedisServiceError as e:
-                ret=add_response({},e.error_code)
+                logger.logger.error(msg="Get token from redis error:{},trace back:{}".format(e, traceback.format_exc()))
+                ret = add_response({}, e.error_code)
             except Exception as e:
-                ret=add_response({},RET.TOKEN_PARSER_ERROR)
+                logger.logger.error(msg="Internal redis error:{},trace back:{}".format(e, traceback.format_exc()))
+                ret = add_response({}, RET.TOKEN_PARSER_ERROR)
         return ret
 
     return wrapper

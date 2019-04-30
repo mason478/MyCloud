@@ -2,7 +2,8 @@ from flask import Flask
 
 from app.api_v1 import api_v1
 from config import config
-from app.commons.common_init import redis_init,logger_init
+from app.commons.common_init import init_function
+from app.commons.log_handler import logger_init
 
 
 def create_app(config_name):
@@ -13,5 +14,5 @@ def create_app(config_name):
     config[config_name].init_app(app)
 
     logger_init(app)
-    redis_init(app)
+    init_function(app)
     return app
