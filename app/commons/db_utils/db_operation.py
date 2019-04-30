@@ -4,7 +4,7 @@ from app.commons.my_exception import SqlOperationError, SqlConditionError
 
 class DbOperation:
     def __init__(self, connect):
-        self.connection = connect.pool.connection()
+        self.connection = connect.pool.connection() # 与连接池建立连接
 
     def select_all_data(self, table, fields=[]):
         """
@@ -85,6 +85,12 @@ class DbOperation:
             self.connection.close()
 
     def delete_data(self, table, condition=dict):
+        """
+        delete data from table,and condition must be dict and not an empty dict,else all data will be deleted.
+        :param table:
+        :param condition: {key,value},in sql:where key=value
+        :return: None
+        """
         if not isinstance(condition, dict) or not condition:
             raise SqlConditionError(error_code=RET.SQL_CONDITION_ERROR,
                                     error_msg="delete condition is required,or it will delete all the data")

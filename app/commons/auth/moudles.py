@@ -11,7 +11,7 @@ class TokenBase(CacheDict):
         :param refresh_token:
         :param expire_time:
         """
-        super(TokenBase, self).__init__(connect, "Token:"+id) #所以在这里需要加上"Token"
+        super(TokenBase, self).__init__(connect, "Token:"+id) #所以在这里需要加上"Token" string
 
         # 设置token
         if token:

@@ -1,5 +1,6 @@
 from app.commons.cache import RedisConnect
 from app.commons.db_utils.connect import SqlConnect
+# from app.commons.db_utils import SqlConnect
 
 connect = RedisConnect()
 sql_connect = SqlConnect()

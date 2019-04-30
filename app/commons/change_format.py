@@ -6,6 +6,7 @@ class RET:
 
     # 应用级错误
     FILE_ERROR = 2001
+    FILE_NOT_FOUND=2002
 
     #验证错误
     TOKEN_NULL=3001

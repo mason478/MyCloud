@@ -62,8 +62,8 @@ def auth_required(func):
                 logger.logger.error(msg="Get token from redis error:{},trace back:{}".format(e, traceback.format_exc()))
                 ret = add_response({}, e.error_code)
             except Exception as e:
-                logger.logger.error(msg="Internal redis error:{},trace back:{}".format(e, traceback.format_exc()))
-                ret = add_response({}, RET.TOKEN_PARSER_ERROR)
+                logger.logger.error(msg="Internal error:{},trace back:{}".format(e, traceback.format_exc()))
+                ret = add_response({}, RET.UNKNOWN_ERROR)
         return ret
 
     return wrapper

@@ -5,6 +5,8 @@ from app.commons.log_handler import logger
 
 
 class SqlConnect:
+    """建立连接池"""
+
     def __init__(self, app=None):
         self.pool = None
         if app:
@@ -18,4 +20,4 @@ class SqlConnect:
                              db=app.config['DB'], user=app.config['DB_USER'], password=app.config['DB_PASSWORD'],
                              host=app.config['DB_HOST'], port=app.config['DB_PORT'],
                              cursorclass=pymysql.cursors.DictCursor)
-        logger.logger.info("****Init mysql database successfully.***")
+        logger.logger.info("***Init mysql database successfully.***")

@@ -3,6 +3,7 @@ import redis
 from app.commons.log_handler import logger
 
 
+# 建立redis 连接池
 class RedisConnect:
     def __init__(self):
         self.pool = None

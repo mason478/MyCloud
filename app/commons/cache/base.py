@@ -4,6 +4,7 @@ from redis import TimeoutError
 from app.commons.my_exception import RedisServiceError
 from app.commons.change_format import RET
 
+
 class CacheObject:
 
     def __init__(self, connect, key):
@@ -20,7 +21,7 @@ class CacheObject:
         except TimeoutError as e:
             raise RedisServiceError(error_code=RET.REDIS_CONNECT_ERROR)
 
-        self.key=key
+        self.key = key
 
     def expire(self, time):
         self.redis.expire(name=self.key, time=time)
