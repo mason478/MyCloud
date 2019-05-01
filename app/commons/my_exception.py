@@ -27,5 +27,6 @@ class SqlConditionError(BaseException):
 class DBError(BaseException):
     pass
 
+
 class DB_Not_Exist_Error(BaseException):
     pass

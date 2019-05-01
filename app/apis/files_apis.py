@@ -45,7 +45,7 @@ class UploadFiles(Resource):
             "url": url_for('api1.files_download', user_id_hash=user_id_hash, filename=file.filename)})
 
 
-# TODO:filename为密文,这个接口不应该作为查询使用;仅限返回url使用
+# TODO:filename为密文;这个接口不应该作为查询使用,仅限返回url使用
 @ns.route('/download/<string:user_id_hash>/<string:filename>')
 class Download(Resource):
     @ns.doc(parser=base_parse)

@@ -43,7 +43,7 @@ class DB(DbOperation):
         判断给定的账号名或者邮箱是否存在相应的用户
         :param account:
         :param email:
-        :return: dict
+        :return: list
         """
         try:
             condition = None

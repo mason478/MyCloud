@@ -8,6 +8,8 @@ from jose.exceptions import ExpiredSignatureError, JWTError, JWSSignatureError
 from app.commons.setting import JWT_SECRET, JWT_EXPIRETIME
 from app.commons.my_exception import GetTokenError
 from app.commons.change_format import RET
+from app.commons.auth.moudles import TokenBase, VerificationCode
+from app.commons.setting import CODE_LENGTH, EXPIRE_TIME
 
 
 def create_token(user_data, expire_time=JWT_EXPIRETIME):
@@ -27,7 +29,9 @@ def create_token(user_data, expire_time=JWT_EXPIRETIME):
         'iat': start_time
     }
     token_jwt = encode_jwt(base_msg)
-    user_data.token=token_jwt
+    user_data.token = token_jwt
+
+    TokenBase(id=str(user_data.user_id), token=token_jwt)  # 把token存入redis
     return token_jwt
 
 
@@ -60,6 +64,12 @@ def encode_jwt(data):
     secret = base64.b64encode(JWT_SECRET.encode())
     r = jwt.encode(data, secret.decode())
     return r
+
+
+def create_verification_code(email,long=CODE_LENGTH):
+    v_code = '1234'
+    VerificationCode(email=email, v_code=v_code, expire_time=EXPIRE_TIME)  # 把验证码存入redis
+    return v_code
 
 
 if __name__ == "__main__":

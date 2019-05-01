@@ -23,6 +23,7 @@ class RET:
     PASSWORD_ERROR = 3010
     USER_NOT_EXIST = 3011
 
+    VERIFY_CODE_ERROR =3015
     # 输入错误
 
     # 权限错误
@@ -42,6 +43,7 @@ error_dict = {
     RET.PASSWORD_ERROR: "密码验证错误",
     RET.USER_NOT_EXIST: "该用户不存在",
     RET.PERMISSION_NOT_ADMIN:"该用户没有管理员权限",
+    RET.VERIFY_CODE_ERROR:"验证码错误或失效",
 }
 
 

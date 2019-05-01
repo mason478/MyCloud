@@ -1,20 +1,21 @@
 import traceback
 
 from flask_restplus import Namespace, Resource, reqparse
-from flask import send_from_directory,after_this_request
+from flask import send_from_directory, after_this_request
 from flask import url_for
 from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import NotFound
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.commons.auth import auth_required
-from app.commons.auth.moudles import TokenBase
+from app.commons.auth.moudles import VerificationCode
 from app.commons.change_format import RET, add_response
 from app.commons.log_handler import logger
 from app.commons.db_utils.db import DB
-from app.commons.my_exception import DBError,DB_Not_Exist_Error
+from app.commons.my_exception import DBError, DB_Not_Exist_Error
 from app.commons.token_handler import create_token
 from app.core import User
+from app.commons.token_handler import create_verification_code
 
 ns = Namespace('users')
 
@@ -27,7 +28,7 @@ login_parser.add_argument('password', type=str, required=True, location='form')
 
 
 # Login,登录方式：账户名登录
-@ns.route('/login')
+@ns.route('/account')
 class UserLoginByAccount(Resource):
     @ns.doc(parser=login_parser)
     def post(self, *args):
@@ -38,14 +39,13 @@ class UserLoginByAccount(Resource):
         try:
             is_correct, user_id = DB.check_password(account=account, password=password)
             if is_correct:
-                user_obj=User(user_id=user_id,account=account)
-                token=create_token(user_data=user_obj)
-                TokenBase(id=str(user_id), token=token)  #把token存入redis
+                user_obj = User(user_id=user_id, account=account)
+                token = create_token(user_data=user_obj)
 
                 @after_this_request
                 def set_cookie(response):
-                    cookie_token=user_obj.token
-                    response.set_cookie('token',cookie_token)
+                    cookie_token = token
+                    response.set_cookie('token', cookie_token)
                     return response
 
                 logger.logger.info("Login successfully!")
@@ -56,6 +56,88 @@ class UserLoginByAccount(Resource):
         except DBError as e:
             logger.logger.error("DB error:{},traceback:{}".format(e, traceback.format_exc()))
             return add_response(r_code=e.error_code)
+
+
+login_by_email_parser = ns.parser()
+login_by_email_parser.add_argument('email', type=str, required=True, location='form')
+login_by_email_parser.add_argument('password', type=str, required=True, location='form')
+
+
+# 邮箱登录
+@ns.route('/email')
+class LoginByEmail(Resource):
+    @ns.doc(parser=login_by_email_parser)
+    def post(self, *args):
+        args = login_by_email_parser.parse_args()
+        email = args['email']
+        password = args['password']
+
+        try:
+            is_correct, user_id = DB.check_password(email=email, password=password)
+            account_name = DB.is_exist_user(email=email)[0].get('account')
+            if is_correct:
+                user_obj = User(user_id=user_id, email=email, account=account_name)  # 账户名一定存在
+                token = create_token(user_data=user_obj)
+
+                @after_this_request
+                def set_cookie(response):
+                    cookie_token = token
+                    response.set_cookie('token', cookie_token)
+                    return response
+
+                logger.logger.info("Login successfully!")
+                return add_response()
+            return add_response(r_code=RET.PASSWORD_ERROR)
+        except DB_Not_Exist_Error as e:
+            return add_response(r_code=e.error_code)
+        except DBError as e:
+            logger.logger.error("DB error:{},traceback:{}".format(e, traceback.format_exc()))
+            return add_response(r_code=e.error_code)
+
+
+# 通过邮箱注册
+register_parser = ns.parser()
+register_parser.add_argument('email', required=True, location='form', type=str)
+register_parser.add_argument('password', required=True, location='form', type=str)
+register_parser.add_argument('verification_code', required=True, location='form', type=str)
+register_parser.add_argument('nickname', type=str, required=True, location='form', help='账户昵称，可以用来登录')
+
+
+@ns.route('/register')
+class Register(Resource):
+    @ns.doc(parser=register_parser)
+    def post(self, *args):
+        args = register_parser.parse_args()
+        email = args['email']
+        password = args['password']
+        v_code = args['verification_code']
+        account = args['nickname']  # nickname 就是account（别名）
+        # TODO:检查验证码与缓存中的是否一样，然后插入数据库
+        is_correct = VerificationCode(email=email).validate_code(v_code)
+        if not is_correct:
+            return add_response(r_code=RET.VERIFY_CODE_ERROR)
+        user_id = DB.generate_user_id()
+        try:
+            DB.create_new_user(account=account, password=password, user_id=user_id, email=email)
+        except DBError as e:
+            logger.logger.error("DB error:{},traceback:{}".format(e.error_code, traceback.format_exc()))
+            return add_response(r_code=e.error_code)
+
+
+verification_code_parser = ns.parser()
+verification_code_parser.add_argument('email', required=True, type=str)
+
+
+# 获取验证码
+@ns.route('/verification-code')
+class GetVerificationCode(Resource):
+    @ns.doc(parser=verification_code_parser)
+    def get(self):
+        args = verification_code_parser.parse_args()
+        email = args['email']
+        # TODO：发送邮件
+        v_code = create_verification_code(email=email)
+        return add_response()
 
 
 admin_parser = base_parser.copy()

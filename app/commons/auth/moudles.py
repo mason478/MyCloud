@@ -39,6 +39,33 @@ class TokenBase(CacheDict):
             return True
         return False
 
+
+# 用于验证码的存取
+class VerificationCode(CacheDict):
+    def __init__(self, email, v_code=None, expire_time=None):
+        """
+        验证码在redis的存储格式为：{"VerificationCode:{email}":{"v_code":v_code}}
+        :param email:
+        :param v_code:
+        :param expire_time: 过期时间，单位秒
+        """
+        super().__init__(connect=connect, key="VerificationCode:" + email)
+
+        if v_code:
+            self['v_code'] = v_code
+        if expire_time:
+            self.expire(time=expire_time)
+
+    @property
+    def v_code(self):
+        return self['code']
+
+    def validate_code(self, input_code):
+        if self['v_code'] == input_code:
+            self.delete()  # 验证正确后就删除验证码
+            return True
+        return False
+
 # if __name__=="__main__":
 #     t=TokenBase(fields='Token:18')
 #     print('hello')
