@@ -12,10 +12,11 @@ from app.commons.auth.moudles import VerificationCode
 from app.commons.change_format import RET, add_response
 from app.commons.log_handler import logger
 from app.commons.db_utils.db import DB
-from app.commons.my_exception import DBError, DB_Not_Exist_Error
+from app.commons.my_exception import DBError, DBNotExistError, SendEmailError
 from app.commons.token_handler import create_token
 from app.core import User
 from app.commons.token_handler import create_verification_code
+from app.commons.send_email import SendEmail
 
 ns = Namespace('users')
 
@@ -28,7 +29,7 @@ login_parser.add_argument('password', type=str, required=True, location='form')
 
 
 # Login,登录方式：账户名登录
-@ns.route('/account')
+@ns.route('/account-login')
 class UserLoginByAccount(Resource):
     @ns.doc(parser=login_parser)
     def post(self, *args):
@@ -48,10 +49,10 @@ class UserLoginByAccount(Resource):
                     response.set_cookie('token', cookie_token)
                     return response
 
-                logger.logger.info("Login successfully!")
+                logger.logger.info("Login by account successfully!")
                 return add_response()
             return add_response(r_code=RET.PASSWORD_ERROR)
-        except DB_Not_Exist_Error as e:
+        except DBNotExistError as e:
             return add_response(r_code=e.error_code)
         except DBError as e:
             logger.logger.error("DB error:{},traceback:{}".format(e, traceback.format_exc()))
@@ -64,14 +65,14 @@ login_by_email_parser.add_argument('password', type=str, required=True, location
 
 
 # 邮箱登录
-@ns.route('/email')
+@ns.route('/email-login')
 class LoginByEmail(Resource):
     @ns.doc(parser=login_by_email_parser)
     def post(self, *args):
         args = login_by_email_parser.parse_args()
         email = args['email']
         password = args['password']
-
+        # TODO:检查邮箱格式
         try:
             is_correct, user_id = DB.check_password(email=email, password=password)
             account_name = DB.is_exist_user(email=email)[0].get('account')
@@ -85,14 +86,17 @@ class LoginByEmail(Resource):
                     response.set_cookie('token', cookie_token)
                     return response
 
-                logger.logger.info("Login successfully!")
+                logger.logger.info("Login by email successfully!")
                 return add_response()
             return add_response(r_code=RET.PASSWORD_ERROR)
-        except DB_Not_Exist_Error as e:
+        except DBNotExistError as e:
             return add_response(r_code=e.error_code)
         except DBError as e:
             logger.logger.error("DB error:{},traceback:{}".format(e, traceback.format_exc()))
             return add_response(r_code=e.error_code)
+        except Exception as e:
+            logger.logger.error("Internal error:{},traceback:{}".format(e, traceback.format_exc()))
+            return add_response(r_code=RET.UNKNOWN_ERROR)
 
 
 # 通过邮箱注册
@@ -112,16 +116,24 @@ class Register(Resource):
         password = args['password']
         v_code = args['verification_code']
         account = args['nickname']  # nickname 就是account（别名）
-        # TODO:检查验证码与缓存中的是否一样，然后插入数据库
+        # TODO:检查account是否有重名
+
+        # 检查验证码与缓存中的是否一样，然后插入数据库
         is_correct = VerificationCode(email=email).validate_code(v_code)
         if not is_correct:
             return add_response(r_code=RET.VERIFY_CODE_ERROR)
         user_id = DB.generate_user_id()
         try:
             DB.create_new_user(account=account, password=password, user_id=user_id, email=email)
+            u = User(user_id=user_id, account=account, email=email)
+            create_token(u)  # 注册完之后直接登录，生成token
+            return add_response({'token': u.token}, RET.OK)
         except DBError as e:
             logger.logger.error("DB error:{},traceback:{}".format(e.error_code, traceback.format_exc()))
             return add_response(r_code=e.error_code)
+        except Exception as e:
+            logger.logger.error("Internal error:{},traceback:{}".format(e, traceback.format_exc()))
+            return add_response(r_code=RET.UNKNOWN_ERROR)
 
 
 verification_code_parser = ns.parser()
@@ -135,9 +147,13 @@ class GetVerificationCode(Resource):
     def get(self):
         args = verification_code_parser.parse_args()
         email = args['email']
-        # TODO：发送邮件
         v_code = create_verification_code(email=email)
-        return add_response()
+        try:
+            SendEmail.send(msg=v_code, subject="验证码", receivers=[email])
+            return add_response()
+        except SendEmailError as e:
+            logger.logger.error("Send email error:{}".format(e))
+            return add_response(r_code=RET.EMAIL_ERROR)
 
 
 admin_parser = base_parser.copy()
@@ -161,7 +177,6 @@ class AdminAddUser(Resource):
         if is_admin != 0:
             is_admin = 1
         # TODO:查询数据库进行比对,是否已经存在
-        # TODO:向数据库插入新的用户
         try:
             login_user_is_admin = DB.is_admin(user_id)  # 判断登录的用户是否是管理员
         except DBError as e:

@@ -2,7 +2,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 
 from app.commons.db_utils.db_operation import DbOperation
 from app.commons.common_init import sql_connect
-from app.commons.my_exception import SqlOperationError, DBError,DB_Not_Exist_Error
+from app.commons.my_exception import SqlOperationError, DBError,DBNotExistError
 from app.commons.change_format import RET
 
 
@@ -30,7 +30,7 @@ class DB(DbOperation):
                 password_hash = cls().select_data_by_condition(table='user', fields=['password','user_id'],
                                                                condition={'account': account})
             if not password_hash:
-                raise DB_Not_Exist_Error(error_code=RET.USER_NOT_EXIST)
+                raise DBNotExistError(error_code=RET.USER_NOT_EXIST)
             user_id=password_hash[0].get('user_id')
             is_correct = check_password_hash(pwhash=password_hash[0].get('password'), password=password)
             return is_correct,user_id

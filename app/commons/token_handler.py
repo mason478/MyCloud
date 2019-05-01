@@ -31,7 +31,7 @@ def create_token(user_data, expire_time=JWT_EXPIRETIME):
     token_jwt = encode_jwt(base_msg)
     user_data.token = token_jwt
 
-    TokenBase(id=str(user_data.user_id), token=token_jwt)  # 把token存入redis
+    TokenBase(id=str(user_data.user_id), token=token_jwt, expire_time=JWT_EXPIRETIME)  # 把token存入redis
     return token_jwt
 
 
@@ -66,7 +66,8 @@ def encode_jwt(data):
     return r
 
 
-def create_verification_code(email,long=CODE_LENGTH):
+def create_verification_code(email, long=CODE_LENGTH):
+    # TODO:生成验证码，&refresh_token
     v_code = '1234'
     VerificationCode(email=email, v_code=v_code, expire_time=EXPIRE_TIME)  # 把验证码存入redis
     return v_code

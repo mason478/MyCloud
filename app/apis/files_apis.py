@@ -45,6 +45,19 @@ class UploadFiles(Resource):
             "url": url_for('api1.files_download', user_id_hash=user_id_hash, filename=file.filename)})
 
 
+# 根据用户id返回所有的文件名
+@ns.route('/source/all')
+class AllTheFiles(Resource):
+    @ns.doc(parser=base_parse)
+    @auth_required
+    def get(self, user_id):
+        # TODO:通过数据库查询用户对应的文件空间
+
+        # TODO:这样同时返回文件夹和文件，暂时不处理
+        files_list = os.listdir(UPLOAD_FILE_PATH)
+        return add_response(r_code=RET.OK, j_dict={"files_list": files_list})
+
+
 # TODO:filename为密文;这个接口不应该作为查询使用,仅限返回url使用
 @ns.route('/download/<string:user_id_hash>/<string:filename>')
 class Download(Resource):
@@ -61,16 +74,3 @@ class Download(Resource):
         except Exception as e:
             logger.logger.error("Unknown error:{}".format(e))
             return add_response(RET.UNKNOWN_ERROR), 500
-
-
-# 根据用户id返回所有的文件名
-@ns.route('/source/all')
-class AllTheFiles(Resource):
-    @ns.doc(parser=base_parse)
-    @auth_required
-    def get(self, user_id):
-        # TODO:通过数据库查询用户对应的文件空间
-
-        # TODO:这样同时返回文件夹和文件，暂时不处理
-        files_list = os.listdir(UPLOAD_FILE_PATH)
-        return add_response(r_code=RET.OK, j_dict={"files_list": files_list})

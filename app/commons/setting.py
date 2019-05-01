@@ -5,7 +5,7 @@ UPLOAD_FILE_PATH = os.getcwd()
 NOT_ALLOWED_EXTENTIONS = ['html', 'js', 'css', 'sh']
 
 JWT_SECRET = os.getenv('JWT_SECRET', "EtnCx2igyMUIQkc9")
-JWT_EXPIRETIME = 60 * 60 * 2  # jwt的过期时间
+JWT_EXPIRETIME = 60 * 60 * 24  # jwt的过期时间
 
 # 文字加密密码
 ENCRYPT_KEY = os.getenv('TEXT_ENCRYPT_KEY', "ThisIsHashKey")
@@ -19,4 +19,8 @@ EXPIRE_TIME = 60 * 10  # 过期时间，秒
 
 
 #邮箱发送配置
-MAIL_HOST=''
+MAIL_HOST='smtp.qq.com'
+MAIL_PORT=25
+MAIL_PASSWORD=os.getenv("MAIL_PASSWORD")
+MAIL_EMAIL='1627237372@qq.com'
+MAIL_USER_NAME='1627237372@qq.com'

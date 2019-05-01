@@ -2,6 +2,7 @@ class BaseException(Exception):
     def __init__(self, error_code, error_msg=None):
         self.error_code = error_code
         self.error_msg = error_msg
+        self.args=(error_code,error_msg)
 
 
 class GetTokenError(BaseException):
@@ -28,5 +29,9 @@ class DBError(BaseException):
     pass
 
 
-class DB_Not_Exist_Error(BaseException):
+class DBNotExistError(BaseException):
+    pass
+
+
+class SendEmailError(BaseException):
     pass
