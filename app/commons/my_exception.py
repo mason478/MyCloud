@@ -8,14 +8,24 @@ class GetTokenError(BaseException):
     '''获取token 失败'''
     pass
 
+
 class RedisServiceError(BaseException):
     """redis 连接错误"""
     pass
+
 
 class SqlOperationError(BaseException):
     """mysql 查询错误"""
     pass
 
+
 class SqlConditionError(BaseException):
     '''mysql条件输入错误'''
+    pass
+
+
+class DBError(BaseException):
+    pass
+
+class DB_Not_Exist_Error(BaseException):
     pass

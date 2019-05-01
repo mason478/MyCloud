@@ -29,18 +29,18 @@ class DbOperation:
         :param table:str:
         :param fields: list
         :param condition: dict:{key:value},查询条件为key==value
-        :return: dict
+        :return: []
         """
         where = []
         for k, v in condition.items():
-            where.append("{}={}".format(k, v))
+            where.append("{}='{}'".format(k, v))
         sql = "select {} from {} where {}".format(','.join(fields), table, ' AND '.join(where))
         try:
             with self.connection.cursor() as cursor:
                 cursor.execute(sql)
                 result = cursor.fetchall()
                 if not result:
-                    return None
+                    return []
                 return result
         except Exception:
             raise SqlOperationError(RET.SQL_OPERATION_ERROR)
@@ -53,8 +53,8 @@ class DbOperation:
         :param condition:{}
         :return:
         """
-        data = ','.join(["{}={}".format(k, v) for k, v in fields.items()])
-        where = " AND ".join(["{}={}".format(k, v) for k, v in condition.items()])
+        data = ','.join(["{}='{}'".format(k, v) for k, v in fields.items()])
+        where = " AND ".join(["{}='{}'".format(k, v) for k, v in condition.items()])
         sql = 'update {} set {} where {}'.format(table, data, where)
 
         try:
@@ -67,13 +67,12 @@ class DbOperation:
         finally:
             self.connection.close()
 
-    # TODO:有问题
     def insert_data(self, table, data=dict):
         fields, values = [], []
         for k, v in data.items():
             fields.append(k)
-            values.append(v)
-        sql = "INSERT INTO `{}` (`{}`) VALUES ({})".format(table, ','.join(fields), ",".join(values))
+            values.append("'%s'"%v)
+        sql = "INSERT INTO {} ({}) VALUES ({})".format(table, ','.join(fields), ",".join(values))
         try:
             cursor = self.connection.cursor()
             cursor.execute(sql)
@@ -111,20 +110,20 @@ if __name__ == "__main__":
     import pymysql
     from DBUtils.PooledDB import PooledDB
 
-    from app.commons.common_init import logger
 
 
     class SqlConnect:
         def __init__(self, app=None):
             self.pool = None
             if app:
-                self.init_app(app)
+                # self.init_app(app)
+                pass
             else:
                 self.pool = PooledDB(pymysql, maxconnections=10,
                                      maxcached=5,
                                      mincached=5,
                                      blocking=True,
-                                     db='user', user='mason',
+                                     db='mycloud', user='mason',
                                      password='1111',
                                      host='localhost', port=3306,
                                      cursorclass=pymysql.cursors.DictCursor)
@@ -133,10 +132,11 @@ if __name__ == "__main__":
     c = SqlConnect()
     dbop = DbOperation(c)
     try:
-        # r = dbop.select_all_data(table='sequence', fields=['name'])
-        # r2=dbop.update_data(table='sequence',fields={'sequence':2},condition={'id':2})
-        # r2 = dbop.insert_data(table='sequence', data={'name': 'wangjiefewfe','sequence':'2'})
-        r2 = dbop.delete_data(table='sequence', condition={'id': 7})
+        # r = dbop.select_all_data(table='user', fields=['name'])
+        # r2=dbop.update_data(table='user',fields={'':2},condition={'id':2})
+        # r2 = dbop.insert_data(table='user', data={'account': 'wangjie2','user_id':1001,})
+        # r2 = doop.delete_data(table='sequence', condition={'id': 7})
+        r2=dbop.select_data_by_condition(table='user',fields=['password','user_id'],condition={'account':'wangjie'})
         print(r2)
     except SqlOperationError as e:
         import traceback

@@ -9,10 +9,11 @@ from app.commons.setting import JWT_SECRET, JWT_EXPIRETIME
 from app.commons.my_exception import GetTokenError
 from app.commons.change_format import RET
 
+
 def create_token(user_data, expire_time=JWT_EXPIRETIME):
     """
     通过user_data类的实例生成jwt
-    :param user_data:an object
+    :param user_data:an user object
     :param expire_time:
     :return:
     """
@@ -21,11 +22,12 @@ def create_token(user_data, expire_time=JWT_EXPIRETIME):
 
     base_msg = {
         'user_id': user_data.user_id,
-        "user_name": user_data.user_name,
+        "account": user_data.account,
         'exp': expire_time,
         'iat': start_time
     }
     token_jwt = encode_jwt(base_msg)
+    user_data.token=token_jwt
     return token_jwt
 
 
@@ -61,10 +63,11 @@ def encode_jwt(data):
 
 
 if __name__ == "__main__":
-    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX25hbWUiOiJ3YW5namllIiwiaWF0IjoxNTU1OTg3OTM5LjQ4NTQ2Niw' \
-            'ibm9kZV9pZCI6IjEyMzQifQ.f2yPUXPT1dR2RNRGe8RVek7tk6IHiKH6BnnlWreuPTk'
+    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxMDAwLCJhY2NvdW50Ijoid2FuZ2ppZSIsImV4cCI6MTU1Nj' \
+            'Y5OTExNywiaWF0IjoxNTU2NjkxOTE3fQ.tjTiIWiW9awrV7NJOFgL6QhFoKW9oZI4Hgs9yMGeLBk'
     # e=encode_jwt({'user_name':'wangjie','iat':time.time(),'node_id':'1234'})
     try:
         r = decode_jwt(token)
+        print(r)
     except Exception as e:
         print(e)

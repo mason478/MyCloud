@@ -11,7 +11,7 @@ class TokenBase(CacheDict):
         :param refresh_token:
         :param expire_time:
         """
-        super(TokenBase, self).__init__(connect, "Token:"+id) #所以在这里需要加上"Token" string
+        super(TokenBase, self).__init__(connect, "Token:" + id)  # 所以在这里需要加上"Token" string
 
         # 设置token
         if token:
@@ -29,16 +29,15 @@ class TokenBase(CacheDict):
     def refresh_token(self):
         return self['refresh_token']
 
-    def validate_token(self,input_token):
+    def validate_token(self, input_token):
         """
         比对token
-        :param input_token str: 将要比对的token
+        :param input_token :str: 将要比对的token
         :return:
         """
-        if self['token']==input_token:
+        if self['token'] == input_token:
             return True
         return False
-
 
 # if __name__=="__main__":
 #     t=TokenBase(fields='Token:18')
