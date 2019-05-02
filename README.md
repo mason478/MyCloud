@@ -1,2 +1,2 @@
 # MyCloud
-my cloud disk files manager
+A cloud disk application(back-end).
