@@ -24,6 +24,8 @@ class RET:
 
     PASSWORD_ERROR = 3010
     USER_NOT_EXIST = 3011
+    USER_ALEADY_EXISTS=3012
+    ACCOUNT_EXISTS=3013
 
     VERIFY_CODE_ERROR =3015
     # 输入错误
@@ -51,6 +53,8 @@ error_dict = {
     RET.EMAIL_ERROR:"邮件发送错误",
     RET.FILE_ALREADY_EXITST:"文件已存在",
     RET.FILE_LISTS_ERROR:"文件列出错误，可能是因为没有该文件夹",
+    RET.USER_ALEADY_EXISTS:"该用户已存在",
+    RET.ACCOUNT_EXISTS:"该名称已有人使用",
 
 }
 
