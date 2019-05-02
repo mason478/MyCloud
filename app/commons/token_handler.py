@@ -1,5 +1,6 @@
 # 生成jwt token,解码token等
 import time
+import random
 import base64
 
 from jose import jwt
@@ -25,6 +26,7 @@ def create_token(user_data, expire_time=JWT_EXPIRETIME):
     base_msg = {
         'user_id': user_data.user_id,
         "account": user_data.account,
+        'id_hash': user_data.id_hash,
         'exp': expire_time,
         'iat': start_time
     }
@@ -67,18 +69,29 @@ def encode_jwt(data):
 
 
 def create_verification_code(email, long=CODE_LENGTH):
-    # TODO:生成验证码，&refresh_token
-    v_code = '1234'
+    """
+    生成随机数验证码
+    :param email:
+    :param long:
+    :return:
+    """
+    # TODO:refresh_token
+    v_code = ''
+    i = 0
+    while i < long:
+        v_code += str(random.choice(range(0, 10)))
+        i += 1
     VerificationCode(email=email, v_code=v_code, expire_time=EXPIRE_TIME)  # 把验证码存入redis
     return v_code
 
 
 if __name__ == "__main__":
-    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoxMDAwLCJhY2NvdW50Ijoid2FuZ2ppZSIsImV4cCI6MTU1Nj' \
-            'Y5OTExNywiaWF0IjoxNTU2NjkxOTE3fQ.tjTiIWiW9awrV7NJOFgL6QhFoKW9oZI4Hgs9yMGeLBk'
+    token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VyX2lkIjoiMTAwNCIsImFjY291bnQiOiJ3YW5namllNSIsImlkX2hhc2giOiIx' \
+            'Y2U1NDVlMDg0MzIxZWFmZWM4YiIsImV4cCI6MTU2NTQyMDk0OSwiaWF0IjoxNTU2NzgwOTQ5fQ.bw2Fc2d5CsGBauJqKav-tABUUfnBKhRq3wGb7Bzvt7c'
     # e=encode_jwt({'user_name':'wangjie','iat':time.time(),'node_id':'1234'})
     try:
         r = decode_jwt(token)
         print(r)
     except Exception as e:
         print(e)
+    print(create_verification_code('test@123.com'))

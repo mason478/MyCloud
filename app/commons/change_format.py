@@ -3,6 +3,7 @@ class RET:
 
     # 系统级错误
     UNKNOWN_ERROR = 1001
+    FILE_LISTS_ERROR=1002
 
     # 数据库链接错误
     REDIS_CONNECT_ERROR = 1002
@@ -13,6 +14,7 @@ class RET:
     # 文件错误
     FILE_ERROR = 2001
     FILE_NOT_FOUND = 2002
+    FILE_ALREADY_EXITST=2003
 
     # 验证错误
     TOKEN_NULL = 3001
@@ -47,6 +49,9 @@ error_dict = {
     RET.PERMISSION_NOT_ADMIN:"该用户没有管理员权限",
     RET.VERIFY_CODE_ERROR:"验证码错误或失效",
     RET.EMAIL_ERROR:"邮件发送错误",
+    RET.FILE_ALREADY_EXITST:"文件已存在",
+    RET.FILE_LISTS_ERROR:"文件列出错误，可能是因为没有该文件夹",
+
 }
 
 

@@ -3,7 +3,7 @@ from hashlib import blake2b
 from app.commons.setting import HASH_KEY
 
 
-def hash_value(string, size=5):
+def hash_value(string, size=10):
     hl = blake2b(digest_size=size, key=HASH_KEY.encode())
     string = string.encode()  # must be bytes
     hl.update(string)

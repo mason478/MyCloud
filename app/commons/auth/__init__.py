@@ -36,7 +36,8 @@ def auth_required(func):
         try:
             payload_dict = decode_jwt(auth_token)  # 解码后的token 是 dict
             payload_keys = list(payload_dict.keys())
-            fields = ['user_id', 'user_name', 'exp', 'iat']  # payload 应该含有的字段
+            print(payload_dict)
+            fields = ['user_id', 'account', 'id_hash','exp', 'iat']  # payload 应该含有的字段
             cmp = all(True if k in payload_keys else False for k in fields)  # 字段的对照
             if not cmp:
                 return add_response({}, RET.TOKEN_INVALID), 401
@@ -47,7 +48,7 @@ def auth_required(func):
             valid = False
             ret = add_response({}, e.error_code)
         except Exception as e:
-            # log
+            logger.logger.error("Parser token error:{}".format(e))
             valid = False
             ret = add_response({}, RET.TOKEN_PARSER_ERROR)
 
@@ -55,9 +56,10 @@ def auth_required(func):
             try:
                 # 验证token 在redis的储存情况
                 user_id = str(payload_dict.get('user_id'))
+                id_hash=payload_dict.get('id_hash')
                 valid = TokenBase(user_id).validate_token(auth_token)
                 if valid:
-                    ret = func(*args, user_id, **kwargs)
+                    ret = func(*args, user_id, id_hash,**kwargs)
             except RedisServiceError as e:
                 logger.logger.error(msg="Get token from redis error:{},trace back:{}".format(e, traceback.format_exc()))
                 ret = add_response({}, e.error_code)

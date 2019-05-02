@@ -35,3 +35,6 @@ class DBNotExistError(BaseException):
 
 class SendEmailError(BaseException):
     pass
+
+class FileHandlerError(BaseException):
+    pass
