@@ -37,12 +37,8 @@ class UploadFiles(Resource):
         if filename is False:
             return add_response(r_code=RET.FILE_ERROR), 400
         # TODO:这里可以从前端传一个文件的hash过来，服务器应维持一个用户文件的hash表，这样可以进行比对；如果一样的hash就不上传，或者只存一个副本
-        # if FileHandler.is_exist_files(path=UPLOAD_FILE_PATH, filename=filename):
-        #     return add_response(r_code=RET.FILE_ALREADY_EXITST), 400
-        # user_id_hash = hash_value(string=str(user_id))
         # TODO:文件限额
         file.save(os.path.join(UPLOAD_FILE_PATH + '/' + id_hash, filename))
-        # TODO:给文件名进行对称加密
         encrypt_filename = EncryptUrlSafe.encrypt_url_safe(filename)
         return add_response(r_code=RET.OK, j_dict={
             "url": url_for('api1.files_download', user_id_hash=id_hash, filename=encrypt_filename)})
@@ -78,7 +74,7 @@ class AllTheFiles(Resource):
         args = files_query_parser.parse_args()
         path = args['path']
         try:
-            files_list = FileHandler.list_files(id_hash +path)
+            files_list = FileHandler.list_files(id_hash + path)
             # TODO:这样同时返回文件夹和文件，暂时不处理
             return add_response(r_code=RET.OK, j_dict={"files_list": files_list})
         except  FileHandlerError as e:
@@ -86,4 +82,4 @@ class AllTheFiles(Resource):
             return add_response(r_code=e.error_code), 500
         except Exception as e:
             logger.logger.error("Unknown error:{}".format(e))
-            return add_response(RET.UNKNOWN_ERROR)
+            return add_response(RET.UNKNOWN_ERROR), 500
