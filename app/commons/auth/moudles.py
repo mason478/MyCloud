@@ -3,15 +3,19 @@ from app.commons.common_init import connect
 
 
 class TokenBase(CacheDict):
-    def __init__(self, id, token=None, refresh_token=None, expire_time=None):
+    def __init__(self, id, token=None, refresh_token=None, expire_time=None,connects=None):
         """
         token在redis里的格式为{"Token:{id}":{"token":{token}}}
         :param id: str:user id
         :param token:
         :param refresh_token:
         :param expire_time:
+        :param connect:RedisConnect obj
         """
-        super(TokenBase, self).__init__(connect, "Token:" + id)  # 所以在这里需要加上"Token" string
+        if connects is not None:
+            super(TokenBase, self).__init__(connects, "Token:" + id)  # 所以在这里需要加上"Token" string
+        else:
+            super(TokenBase, self).__init__(connect, "Token:" + id)  # 所以在这里需要加上"Token" string
 
         # 设置token
         if token:
@@ -42,14 +46,17 @@ class TokenBase(CacheDict):
 
 # 用于验证码的存取
 class VerificationCode(CacheDict):
-    def __init__(self, email, v_code=None, expire_time=None):
+    def __init__(self, email, v_code=None, expire_time=None,connects=None):
         """
         验证码在redis的存储格式为：{"VerificationCode:{email}":{"v_code":v_code}}
         :param email:
         :param v_code:
         :param expire_time: 过期时间，单位秒
         """
-        super().__init__(connect=connect, key="VerificationCode:" + email)
+        if connects is not None:
+            super().__init__(connect=connects, key="VerificationCode:" + email)
+        else:
+            super().__init__(connect=connect, key="VerificationCode:" + email)
 
         if v_code:
             self['v_code'] = v_code
@@ -58,7 +65,7 @@ class VerificationCode(CacheDict):
 
     @property
     def v_code(self):
-        return self['code']
+        return self['v_code']
 
     def validate_code(self, input_code):
         if self['v_code'] == input_code:

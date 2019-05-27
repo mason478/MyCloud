@@ -8,9 +8,12 @@ from app.commons.change_format import RET
 
 # 对DbOperation的继承，最顶层调用就用这个类
 class DB(DbOperation):
-    def __init__(self):
+    def __init__(self,connect=None):
+        if connect is None:
+            super(DB, self).__init__(connect=sql_connect)
+        else:
+            super(DB, self).__init__(connect=connect)
 
-        super(DB, self).__init__(connect=sql_connect)
 
     @classmethod
     def check_password(cls, password, email=None, account=None):
@@ -52,7 +55,10 @@ class DB(DbOperation):
             if email:
                 condition = {'email': email}
             rt = cls().select_data_by_condition(table='user', fields=['user_id', 'account'], condition=condition)
-            return rt
+            if rt:
+                return True
+            return False
+
         except SqlOperationError as e:
             raise DBError(error_code=e.error_code)
 

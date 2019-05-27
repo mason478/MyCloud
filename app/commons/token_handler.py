@@ -33,7 +33,7 @@ def create_token(user_data, expire_time=JWT_EXPIRETIME):
     token_jwt = encode_jwt(base_msg)
     user_data.token = token_jwt
 
-    TokenBase(id=str(user_data.user_id), token=token_jwt, expire_time=JWT_EXPIRETIME)  # 把token存入redis
+    # TokenBase(id=str(user_data.user_id), token=token_jwt, expire_time=JWT_EXPIRETIME)  # 把token存入redis
     return token_jwt
 
 

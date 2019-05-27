@@ -10,7 +10,7 @@ class DbOperation:
         """
         :param table: 待查询的表
         :param fields: 待查询的字段(column name)
-        :return:list
+        :return:lit
         """
         sql = "select {field} from {tab}".format(field=",".join(fields), tab=table)
         try:

@@ -7,7 +7,9 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.exceptions import NotFound
 from werkzeug.security import check_password_hash, generate_password_hash
 
+from app.commons.setting import JWT_SECRET, JWT_EXPIRETIME
 from app.commons.auth import auth_required
+from app.commons.auth.moudles import TokenBase, VerificationCode
 from app.commons.files_utils import FileHandler
 from app.commons.auth.moudles import VerificationCode
 from app.commons.change_format import RET, add_response
@@ -43,6 +45,7 @@ class UserLoginByAccount(Resource):
             if is_correct:
                 user_obj = User(user_id=user_id, account=account)
                 token = create_token(user_data=user_obj)
+                TokenBase(id=str(user_id), token=token, expire_time=JWT_EXPIRETIME)  # 把token存入redis
 
                 @after_this_request
                 def set_cookie(response):
@@ -76,10 +79,12 @@ class LoginByEmail(Resource):
         # TODO:检查邮箱格式
         try:
             is_correct, user_id = DB.check_password(email=email, password=password)
-            account_name = DB.is_exist_user(email=email)[0].get('account')
+            account_name = DB.is_exist_user(email=email)[0].get('account')  # TODO:因为改了接口，现在这里有bug
+
             if is_correct:
                 user_obj = User(user_id=user_id, email=email, account=account_name)  # 账户名一定存在
                 token = create_token(user_data=user_obj)
+                TokenBase(id=str(user_id), token=token, expire_time=JWT_EXPIRETIME)  # 把token存入redis
 
                 @after_this_request
                 def set_cookie(response):
@@ -141,7 +146,8 @@ class Register(Resource):
             DB.create_new_user(account=account, password=password, user_id=user_id, email=email)
             u = User(user_id=user_id, account=account, email=email)
             FileHandler.create_directory_by_user(u)  # 注册的时候给用户新建一个文件夹（空间）
-            create_token(u)  # 注册完之后直接登录，生成token
+            token=create_token(u)  # 注册完之后直接登录，生成token
+            TokenBase(id=str(user_id), token=token, expire_time=JWT_EXPIRETIME)  # 把token存入redis
 
             @after_this_request
             def set_cookie(response):
