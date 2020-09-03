@@ -1,5 +1,5 @@
 from flask import Blueprint
-from flask_restplus import Api,apidoc
+from flask_restplus import Api
 from app.apis.files_apis import ns as file_ns
 from app.apis.user_login_apis import ns as login_ns
 
