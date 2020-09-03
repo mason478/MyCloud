@@ -16,6 +16,7 @@ class Logger(object):
     """
     日志模块，初始化时从config.py中读取相关的配置
     """
+
     def __init__(self, app=None):
         self.logger = logging.getLogger()
         if app:
