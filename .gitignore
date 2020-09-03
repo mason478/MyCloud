@@ -1,0 +1,10 @@
+venv
+*.pyc
+*.out
+.idea
+.idea/
+test.py
+*.log
+*.png
+workspace.xml
+.pytest_cache/
